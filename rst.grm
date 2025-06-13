@@ -1,0 +1,93 @@
+"start symbol" = <program>
+
+{String Ch}     = {Printable} - ["]
+
+Whitespace       = [ \t\r\n]+
+Identifier       = [a-zA-Z_][a-zA-Z0-9_]*
+Integer          = {Digit}+
+Float            = ( {Digit}+ '.' {Digit}* | '.' {Digit}+ ) ( [eE] [+-]? {Digit}+ )? 
+                 | {Digit}+ [eE] [+-]? {Digit}+
+String           = '"' {String Ch}* '"'   ! String literals
+Char             = {AlphaNumeric}
+Boolean          = 'true' | 'false'
+
+!Keyword         = let | fn | mut | if | else | loop | while | for | return | pub | struct | enum | trait | impl
+!Operator        = '+' | '-' | '*' | '/' | '%' | '==' | '!=' | '<' | '>' | '<=' | '>=' | '&&' | '||' | '!'
+!Delimiter       = '{' | '}' | '(' | ')' | '[' | ']' | ';' | ',' | '->' | '::' | '=' | ':'
+
+<program> ::= <stmt_list>
+
+<stmt_list> ::= <stmt> 
+              | <stmt> <stmt_list>
+
+<stmt> ::= <declaration>
+         | <assignment>
+         | <condition>
+         | <loop>
+         | <method_decl>
+         | <method_call_stmt>
+
+<declaration> ::= 'let' Identifier ';'
+               | 'let' 'mut' Identifier ';'
+               | 'let' Identifier ':' <type> ';'
+               | 'let' 'mut' Identifier ':' <type> ';'
+               | 'let' Identifier '=' <expr> ';'
+               | 'let' 'mut' Identifier '=' <expr> ';'
+               | 'let' Identifier ':' <type> '=' <expr> ';'
+               | 'let' 'mut' Identifier ':' <type> '=' <expr> ';'
+
+<type> ::= 'i32'
+         | 'f64'
+         | 'bool'
+         | 'String'
+         | 'char'
+         | '&' <type>
+         | '&mut' <type>
+         | 'Vec' '<' <type> '>'
+
+<assignment> ::= Identifier '=' <expr> ';'
+
+<condition> ::= 'if' <expr> '{' <stmt_list> '}'
+              | 'if' <expr> '{' <stmt_list> '}' 'else' '{' <stmt_list> '}'
+
+<loop> ::= 'loop' '{' <stmt_list> '}'
+         | 'while' <expr> '{' <stmt_list> '}'
+         | 'for' Identifier 'in' <expr> '{' <stmt_list> '}'
+
+<method_decl> ::= 'fn' Identifier '(' <params> ')' '{' <stmt_list> '}'
+                | 'fn' Identifier '(' <params> ')' '->' <type> '{' <stmt_list> '}'
+
+<params> ::= <param> <params_tail>
+<params_tail> ::= ',' <param> <params_tail> |
+                |
+
+<param> ::= Identifier ':' <type>
+
+<method_call_stmt> ::= <method_call> ';'
+<method_call> ::= Identifier '(' <args> ')'
+
+<args> ::= <expr> <args_tail>
+<args_tail> ::= ',' <expr> <args_tail> |
+              |
+
+<expr> ::= <term>
+         | <term> <add_sub_operators> <expr>
+
+<add_sub_operators> ::= '+' | '-'
+
+<mul_div_operators> ::= '*' | '/' | '%'
+
+<term> ::= <factor>
+         | <factor> <mul_div_operators> <term>
+
+<factor> ::= Identifier 
+           | Literal 
+           | '(' <expr> ')' 
+           | <method_call>
+
+<literal> ::= Integer 
+            | Float 
+            | Boolean 
+            | String 
+            | Char
+
